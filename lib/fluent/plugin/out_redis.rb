@@ -1,7 +1,7 @@
 module Fluent
   class RedisOutput < BufferedOutput
     Fluent::Plugin.register_output('redis', self)
-    attr_reader :host, :port, :db_number, :redis
+    attr_reader :host, :port, :db_number, :password, :redis
 
     def initialize
       super
@@ -15,6 +15,7 @@ module Fluent
       @host = conf.has_key?('host') ? conf['host'] : 'localhost'
       @port = conf.has_key?('port') ? conf['port'].to_i : 6379
       @db_number = conf.has_key?('db_number') ? conf['db_number'].to_i : nil
+      @password = conf.has_key?('password') ? conf['password'] : nil
 
       if conf.has_key?('namespace')
         $log.warn "namespace option has been removed from fluent-plugin-redis 0.1.3. Please add or remove the namespace '#{conf['namespace']}' manually."
@@ -26,6 +27,9 @@ module Fluent
 
       @redis = Redis.new(:host => @host, :port => @port,
                          :thread_safe => true, :db => @db_number)
+      if ! password.nil? then
+       @redis.auth(@password)
+      end
     end
 
     def shutdown
