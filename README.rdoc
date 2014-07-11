@@ -21,7 +21,7 @@ Then fluent automatically loads the plugin installed.
       # database number is optional.
       db_number 0        # 0 is default
       # optional password for authtication
-	  password abcdefg
+      password abcdefg
     </match>
 
 
