@@ -1,0 +1,29 @@
+# Rediz Sorted Set ZINCRBY Plugin
+
+## Deployment
+
+Place `out_rzinc.rb` at a fluent plugin directory. E.g. `/usr/lib64/fluent/ruby/lib/ruby/gems/1.9.1/gems/fluent-plugin-redis-0.2.0/lib/fluent/plugin`.
+
+## Configuration
+
+    <source>
+      type tail
+      format /(?<datetime>\w{3} \d{2} \d{2}:\d{2}:\d{2}.\d{3}) \[(.*?)\]\[(.*?)\]\[(.*?)\]: (?<from>\d*.\d*.\d*.\d*) (.*) (.*) \[(.*?)\] \"(.*)uri=(?<uri>.*?)[?& ](.*)HTTP\/1.1\" (?<ret>\d*) (?<size>\d*) (?<from_ip>\d*.\d*.\d*.\d*):(?<from_port>\d*)/
+      path /var/log/ixspd/ixspd.log
+      pos_file /var/log/td-agent/ixspd.log
+      tag tmasp.log
+    </source>
+
+    <match tmasp.log.**>
+      type rzinc
+      host tmasptrial.redis.cache.windows.net
+      port 6379
+      db_number 0
+      password aPygEyqts3DF9hGhc7FjM/yAfTMQBLKDVxCaTYMcc08=
+      key URI
+      increment 1
+      regex_match uri
+      flush_interval 10s
+    </match>
+
+The `regex_match` parameter must be supplied from a regular expression group of the `format` parametert in the `source` section.
