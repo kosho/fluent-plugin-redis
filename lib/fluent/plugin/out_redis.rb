@@ -46,7 +46,11 @@ module Fluent
         chunk.open { |io|
           begin
             MessagePack::Unpacker.new(io).each.each_with_index { |record, index|
+			begin
               @redis.mapped_hmset "#{record[0]}.#{index}", record[1]
+			rescue RUntimeError
+			  @redis.auth(@password)
+			  @redis.mapped_hmset "#{record[0]}.#{index}", record[1]
             }
           rescue EOFError
             # EOFError always occured when reached end of chunk.
