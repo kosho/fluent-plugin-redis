@@ -33,7 +33,6 @@ module Fluent
 
       if ! password.nil? then
         @redis.auth(@password)
-	log.info "password=#{@password}"
       end
     end
 
@@ -51,9 +50,14 @@ module Fluent
         chunk.open { |io|
           begin
             MessagePack::Unpacker.new(io).each.each_with_index { |record, index|
-	      member = record[1].fetch(@regex_match)
-	      @redis.zincrby(@key, @increment, member)
-#	      $log.info "ZINCRBY #{@key} #{@increment} #{member}" 
+              member = record[1].fetch(@regex_match)
+              begin
+                @redis.zincrby(@key, @increment, member)
+              rescue RuntimeError
+                @redis.auth(@password)
+                @redis.zincrby(@key, @increment, member)
+              end
+#              $log.info "ZINCRBY #{@key} #{@increment} #{member}"
             }
           rescue EOFError
             # EOFError always occured when reached end of chunk.
